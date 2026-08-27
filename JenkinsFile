@@ -52,7 +52,7 @@ pipeline {
 
     post {
         always {
-            node {
+            node('built-in') {
                 script {
                     try {
                         unstash 'test-reports'
