@@ -43,7 +43,7 @@ pipeline {
                     -v "$PWD/target/helloworldwithjava-1.0.0.jar:/app/app.jar" \
                     eclipse-temurin:21-jre-alpine \
                     java -jar /app/app.jar
-                    sleep 3
+                    sleep 3 
                     curl http://localhost:8085/
                 '''
             }
