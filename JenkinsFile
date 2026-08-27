@@ -71,40 +71,9 @@ pipeline {
 
     post {
         always {
-            node('built-in') {
-                script {
-                    def reportHtml = '<p>No test summary found.</p>'
-                    def fullReportLink = "${env.BUILD_URL}artifact/target/surefire-html/surefire-report.html"
-                    try {
-                        unstash 'test-reports'
-                        if (fileExists('reports/email-report.html')) {
-                            reportHtml = readFile('reports/email-report.html')
-                        }
-                    } catch (err) {
-                        echo "No test reports available: ${err}"
-                    }
-
-                    mail(
-                        to: 'dreamcoincollection@gmail.com',
-                        subject: "Jenkins ${currentBuild.fullDisplayName}: ${currentBuild.currentResult}",
-                        mimeType: 'text/html',
-                        body: """
-<html>
-<body style="font-family:Arial,sans-serif">
-<p>Hello,</p>
-<p><b>Build:</b> ${env.JOB_NAME} #${env.BUILD_NUMBER}<br/>
-<b>Result:</b> ${currentBuild.currentResult}<br/>
-<a href="${env.BUILD_URL}">Build URL</a> |
-<a href="${env.BUILD_URL}testReport/">Jenkins Test Result</a> |
-<a href="${fullReportLink}">Full Surefire Report (with images)</a></p>
-<hr/>
-${reportHtml}
-</body>
-</html>
-"""
-                    )
-                }
-            }
+            echo 'Publishing HTML report...'
+            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'reports', reportFiles: 'surefire-report.html', reportName: 'Surefire HTML Report', reportTitles: '', useWrapperFileDirectly: true])
         }
+            
     }
 }
