@@ -25,6 +25,11 @@ pipeline {
             steps {
                 sh 'export HOME="${WORKSPACE}" && mkdir -p "${HOME}/.m2" && mvn test'
             }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
+                }
+            }
         }
 
         stage('Deploy stage') {
