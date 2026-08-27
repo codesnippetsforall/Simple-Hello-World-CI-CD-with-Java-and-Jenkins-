@@ -14,13 +14,13 @@ mvn clean package
 java -jar target/helloworldwithjava-1.0.0.jar
 ```
 
-Then open `http://localhost:8081/` in a browser. Expected page text:
+Then open `http://localhost:8085/` in a browser. Expected page text:
 
 ```text
 Hello, World!
 ```
 
-On EC2, use `http://<ec2-public-ip>:8081/` and open port `8081` in the security group. Optional port: `java -jar target/helloworldwithjava-1.0.0.jar 9090`.
+On EC2, use `http://<ec2-public-ip>:8085/` and open port `8085` in the security group. Optional port: `java -jar target/helloworldwithjava-1.0.0.jar 9090`.
 
 Run tests only:
 
