@@ -10,7 +10,7 @@ pipeline {
         DOCKER_HOST_ALIAS = 'docker'
         STASH_APP_JAR     = 'app-jar'
         STASH_TEST_REPORTS = 'test-reports'
-        EMAIL_TO          = 'dreamcoincollection@gmail.com'
+        EMAIL_TO          = credentials('REPORT_TO_ADDRESS_EMAIL_ID')
         REPORT_NAME       = 'Surefire HTML Report'
     }
 
