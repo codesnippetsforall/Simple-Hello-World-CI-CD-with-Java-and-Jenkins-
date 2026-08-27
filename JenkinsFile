@@ -38,7 +38,8 @@ pipeline {
                 sh 'docker rm helloworld-app || true'
                 sh 'docker run -d --name helloworld-app -p 8085:8085 -v "${WORKSPACE}/target/helloworldwithjava-1.0.0.jar:/app/app.jar" eclipse-temurin:21-jre-alpine java -jar /app/app.jar'
                 sh 'sleep 5'
-                sh 'curl -f --max-time 10 http://localhost:8085/'
+                sh 'docker logs helloworld-app'
+                sh 'curl -f --max-time 10 http://docker:8085/'
             }
         }
     }
