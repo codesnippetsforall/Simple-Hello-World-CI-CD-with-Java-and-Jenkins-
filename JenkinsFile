@@ -65,12 +65,18 @@ pipeline {
             }
             steps {
                 unstash 'app-jar'
-                sh 'docker stop Hurrayworld-app || true'
-                sh 'docker rm Hurrayworld-app || true'
-                sh 'docker run -d --name Hurrayworld-app -p 8085:8085 -v "${WORKSPACE}/target/Hurrayworldwithjava-1.0.0.jar:/app/app.jar" eclipse-temurin:21-jre-alpine java -jar /app/app.jar'
-                sh 'sleep 5'
-                sh 'docker logs Hurrayworld-app'
-                sh 'curl -f --max-time 10 http://docker:8085/'
+                sh '''
+                    echo "Releasing port 8085 if already in use..."
+                    ids=$(docker ps -aq --filter publish=8085)
+                    if [ -n "$ids" ]; then
+                      docker rm -f $ids
+                    fi
+                    docker rm -f Hurrayworld-app helloworld-app 2>/dev/null || true
+                    docker run -d --name Hurrayworld-app -p 8085:8085 -v "${WORKSPACE}/target/Hurrayworldwithjava-1.0.0.jar:/app/app.jar" eclipse-temurin:21-jre-alpine java -jar /app/app.jar
+                    sleep 5
+                    docker logs Hurrayworld-app
+                    curl -f --max-time 10 http://docker:8085/
+                '''
             }
         }
     }
