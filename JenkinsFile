@@ -28,24 +28,26 @@ pipeline {
                     mkdir -p "${HOME}/.m2" reports
                     mvn test
                     mvn -q surefire-report:report-only
-                    ls -laR target/surefire-html target/site target/surefire-reports || true
-                    if [ -f target/surefire-html/surefire-report.html ]; then
-                      cp -f target/surefire-html/surefire-report.html reports/surefire-report.html
-                    elif [ -f target/site/surefire-report.html ]; then
-                      cp -f target/site/surefire-report.html reports/surefire-report.html
-                    else
-                      echo "<html><body><h1>JUnit Surefire Summary</h1><pre>" > reports/surefire-report.html
-                      cat target/surefire-reports/*.txt >> reports/surefire-report.html 2>/dev/null || true
-                      echo "</pre></body></html>" >> reports/surefire-report.html
-                    fi
-                    ls -la reports/surefire-report.html
+
+                    # Email-friendly report (no external images/css)
+                    {
+                      echo '<html><body style="font-family:Arial,sans-serif">'
+                      echo '<h2>JUnit 5 Surefire Summary</h2>'
+                      echo '<pre style="background:#f6f8fa;padding:12px;border-radius:6px">'
+                      cat target/surefire-reports/*.txt 2>/dev/null || echo "No txt summary found"
+                      echo '</pre>'
+                      echo '<p>Open the full styled report from the Jenkins artifact link in this email.</p>'
+                      echo '</body></html>'
+                    } > reports/email-report.html
+
+                    ls -la reports target/surefire-html target/surefire-reports || true
                 '''
             }
             post {
                 always {
                     junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
-                    archiveArtifacts artifacts: 'reports/surefire-report.html,target/surefire-reports/*.xml', allowEmptyArchive: true
-                    stash name: 'test-reports', includes: 'reports/surefire-report.html,target/surefire-reports/*.xml', allowEmpty: true
+                    archiveArtifacts artifacts: 'reports/email-report.html,target/surefire-html/**,target/surefire-reports/*.xml', allowEmptyArchive: true
+                    stash name: 'test-reports', includes: 'reports/email-report.html', allowEmpty: true
                 }
             }
         }
@@ -71,33 +73,31 @@ pipeline {
         always {
             node('built-in') {
                 script {
-                    def reportHtml = '<p>No Surefire HTML report found.</p>'
-                    def reportLink = "${env.BUILD_URL}artifact/reports/surefire-report.html"
+                    def reportHtml = '<p>No test summary found.</p>'
+                    def fullReportLink = "${env.BUILD_URL}artifact/target/surefire-html/surefire-report.html"
                     try {
                         unstash 'test-reports'
-                        if (fileExists('reports/surefire-report.html')) {
-                            reportHtml = readFile('reports/surefire-report.html')
+                        if (fileExists('reports/email-report.html')) {
+                            reportHtml = readFile('reports/email-report.html')
                         }
                     } catch (err) {
                         echo "No test reports available: ${err}"
                     }
 
-                    // mail step cannot attach files; report is inlined + download link
                     mail(
                         to: 'dreamcoincollection@gmail.com',
                         subject: "Jenkins ${currentBuild.fullDisplayName}: ${currentBuild.currentResult}",
                         mimeType: 'text/html',
                         body: """
 <html>
-<body>
+<body style="font-family:Arial,sans-serif">
 <p>Hello,</p>
 <p><b>Build:</b> ${env.JOB_NAME} #${env.BUILD_NUMBER}<br/>
 <b>Result:</b> ${currentBuild.currentResult}<br/>
 <a href="${env.BUILD_URL}">Build URL</a> |
 <a href="${env.BUILD_URL}testReport/">Jenkins Test Result</a> |
-<a href="${reportLink}">Download Surefire HTML Report</a></p>
+<a href="${fullReportLink}">Full Surefire Report (with images)</a></p>
 <hr/>
-<h3>JUnit 5 Surefire Report</h3>
 ${reportHtml}
 </body>
 </html>
