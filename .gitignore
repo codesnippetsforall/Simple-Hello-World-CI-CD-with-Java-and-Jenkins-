@@ -1,0 +1,15 @@
+target/
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+*.class
+*.jar
+*.war
+*.log
+.DS_Store
+Thumbs.db
+ec2-instance-for-playground.txt
+.github/workflows/ci.yml
