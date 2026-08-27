@@ -11,10 +11,12 @@ pipeline {
             }
             steps {
                 sh '''
+                    export HOME="${WORKSPACE}"
+                    mkdir -p "${HOME}/.m2"
                     ls -la
                     java --version
                     mvn -v
-                    mvn clean                  
+                    mvn clean
                 '''
             }
         }
