@@ -8,7 +8,7 @@ pipeline {
 
     stages {
         stage('Build stage') {            
-            agent any
+
             steps {
                 sh '''
                     export HOME="${WORKSPACE}"
@@ -22,7 +22,6 @@ pipeline {
         }
         
         stage('Test stage') {
-            agent any
             steps {
                 sh '''
                  export HOME="${WORKSPACE}"
