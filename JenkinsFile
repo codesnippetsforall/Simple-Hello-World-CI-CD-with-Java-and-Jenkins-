@@ -54,33 +54,36 @@ pipeline {
         always {
             node('built-in') {
                 script {
+                    def reportHtml = '<p>No Surefire HTML report found.</p>'
                     try {
                         unstash 'test-reports'
+                        if (fileExists('target/site/surefire-report.html')) {
+                            reportHtml = readFile('target/site/surefire-report.html')
+                        }
                     } catch (err) {
-                        echo 'No test reports available to attach'
+                        echo 'No test reports available to include in email'
                     }
+
+                    mail(
+                        to: 'dreamcoincollection@gmail.com',
+                        subject: "Jenkins ${currentBuild.fullDisplayName}: ${currentBuild.currentResult}",
+                        mimeType: 'text/html',
+                        body: """
+<html>
+<body>
+<p>Hello,</p>
+<p><b>Build:</b> ${env.JOB_NAME} #${env.BUILD_NUMBER}<br/>
+<b>Result:</b> ${currentBuild.currentResult}<br/>
+<a href="${env.BUILD_URL}">Build URL</a> |
+<a href="${env.BUILD_URL}testReport/">Jenkins Test Result</a></p>
+<hr/>
+<h3>JUnit 5 Surefire Report</h3>
+${reportHtml}
+</body>
+</html>
+"""
+                    )
                 }
-                emailext(
-                    to: 'dreamcoincollection@gmail.com',
-                    subject: "Jenkins ${currentBuild.fullDisplayName}: ${currentBuild.currentResult}",
-                    mimeType: 'text/plain',
-                    body: """Hello,
-
-Build: ${env.JOB_NAME} #${env.BUILD_NUMBER}
-Result: ${currentBuild.currentResult}
-URL: ${env.BUILD_URL}
-
-Jenkins Test Result: ${env.BUILD_URL}testReport/
-
-JUnit 5 HTML report is attached (surefire-report.html).
-Surefire XML reports are also attached.
-
-Regards,
-Jenkins
-""",
-                    attachmentsPattern: 'target/site/surefire-report.html,target/surefire-reports/*.xml',
-                    attachLog: false
-                )
             }
         }
     }
