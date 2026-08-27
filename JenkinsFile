@@ -14,7 +14,7 @@ pipeline {
                     ls -la
                     java --version
                     mvn -v
-                    mvn clean package -DskipTests                    
+                    mvn clean                  
                 '''
             }
         }
