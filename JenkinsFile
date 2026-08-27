@@ -7,43 +7,39 @@ pipeline {
     }
 
     stages {
-        stage('Build stage') {            
-
+        stage('Build stage') {
             steps {
                 sh '''
                     export HOME="${WORKSPACE}"
                     mkdir -p "${HOME}/.m2"
-                    ls -la
                     java --version
                     mvn -v
                     mvn clean package -DskipTests
                 '''
+                stash includes: 'target/helloworldwithjava-1.0.0.jar', name: 'app-jar'
             }
         }
-        
+
         stage('Test stage') {
             steps {
                 sh '''
-                 export HOME="${WORKSPACE}"
-                 mkdir -p "${HOME}/.m2"
-                 ls -la
-                 mvn test
-                '''  
+                    export HOME="${WORKSPACE}"
+                    mkdir -p "${HOME}/.m2"
+                    mvn test
+                '''
             }
         }
 
         stage('Deploy stage') {
             agent any
             steps {
+                unstash 'app-jar'
                 sh '''
                     docker stop helloworld-app || true
                     docker rm helloworld-app || true
-                    docker run -d --name helloworld-app -p 8085:8085 \
-                    -v "$PWD/target/helloworldwithjava-1.0.0.jar:/app/app.jar" \
-                    eclipse-temurin:21-jre-alpine \
-                    java -jar /app/app.jar
-                    sleep 3 
-                    curl http://localhost:8085/
+                    docker run -d --name helloworld-app -p 8085:8085 -v "${WORKSPACE}/target/helloworldwithjava-1.0.0.jar:/app/app.jar" eclipse-temurin:21-jre-alpine java -jar /app/app.jar
+                    sleep 3
+                    curl -f http://localhost:8085/
                 '''
             }
         }
