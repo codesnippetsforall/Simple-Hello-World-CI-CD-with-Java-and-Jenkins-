@@ -11,7 +11,7 @@ pipeline {
             }
             steps {
                 sh 'export HOME="${WORKSPACE}" && mkdir -p "${HOME}/.m2" && mvn clean package -DskipTests'
-                stash includes: 'target/helloworldwithjava-1.0.0.jar', name: 'app-jar'
+                stash includes: 'target/Hurrayworldwithjava-1.0.0.jar', name: 'app-jar'
             }
         }
 
@@ -65,11 +65,11 @@ pipeline {
             }
             steps {
                 unstash 'app-jar'
-                sh 'docker stop helloworld-app || true'
-                sh 'docker rm helloworld-app || true'
-                sh 'docker run -d --name helloworld-app -p 8085:8085 -v "${WORKSPACE}/target/helloworldwithjava-1.0.0.jar:/app/app.jar" eclipse-temurin:21-jre-alpine java -jar /app/app.jar'
+                sh 'docker stop Hurrayworld-app || true'
+                sh 'docker rm Hurrayworld-app || true'
+                sh 'docker run -d --name Hurrayworld-app -p 8085:8085 -v "${WORKSPACE}/target/Hurrayworldwithjava-1.0.0.jar:/app/app.jar" eclipse-temurin:21-jre-alpine java -jar /app/app.jar'
                 sh 'sleep 5'
-                sh 'docker logs helloworld-app'
+                sh 'docker logs Hurrayworld-app'
                 sh 'curl -f --max-time 10 http://docker:8085/'
             }
         }
@@ -96,7 +96,7 @@ pipeline {
                         body: """
 <html>
 <body style="font-family:Arial,sans-serif">
-<p>Hello,</p>
+<p>Hurray,</p>
 <p><b>Build:</b> ${env.JOB_NAME} #${env.BUILD_NUMBER}<br/>
 <b>Result:</b> ${currentBuild.currentResult}<br/>
 <a href="${env.BUILD_URL}">Build URL</a> |

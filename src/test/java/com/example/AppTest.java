@@ -19,15 +19,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class AppTest {
     @Test
     @Order(2)
-    @DisplayName("greet returns Hello message for given name")
-    void greetReturnsHelloWorld() {
-        assertEquals("Hello, World it is full of surprises !", App.greet("World it is full of surprises "));
+    @DisplayName("greet returns Hurray message for given name")
+    void greetReturnsHurrayWorld() {
+        assertEquals("Hurray, World it is full of surprises !", App.greet("World it is full of surprises "));
     }
 
     @Test
     @Order(1)
-    @DisplayName("HTTP GET / returns Hello World body")
-    void httpGetRootReturnsHelloWorld() throws Exception {
+    @DisplayName("HTTP GET / returns Hurray World body")
+    void httpGetRootReturnsHurrayWorld() throws Exception {
         HttpServer server = App.startServer(0);
         try {
             int port = server.getAddress().getPort();
@@ -37,8 +37,8 @@ class AppTest {
                     .build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             assertEquals(200, response.statusCode());
-            assertEquals("Hello, World it is full of surprises !", response.body());
-            assertTrue(response.body().startsWith("Hello,"));
+            assertEquals("Hurray, World it is full of surprises !", response.body());
+            assertTrue(response.body().startsWith("Hurray,"));
         } finally {
             server.stop(0);
         }

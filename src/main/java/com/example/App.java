@@ -11,7 +11,7 @@ public class App {
     public static final int DEFAULT_PORT = 8085;
 
     public static String greet(String name) {
-        return "Hello, " + name + "!";
+        return "Hurray, " + name + "!";
     }
 
     public static HttpServer startServer(int port) throws IOException {

@@ -1,6 +1,6 @@
-# Hello World with Java — GitHub CI/CD
+# Hurray World with Java — GitHub CI/CD
 
-Simple Maven Java HTTP app that serves `Hello, World!` in the browser, with GitHub Actions CI that builds, tests, and uploads the JAR on every push/PR to `main`.
+Simple Maven Java HTTP app that serves `Hurray, World!` in the browser, with GitHub Actions CI that builds, tests, and uploads the JAR on every push/PR to `main`.
 
 ## Prerequisites
 
@@ -11,16 +11,16 @@ Simple Maven Java HTTP app that serves `Hello, World!` in the browser, with GitH
 
 ```bash
 mvn clean package
-java -jar target/helloworldwithjava-1.0.0.jar
+java -jar target/Hurrayworldwithjava-1.0.0.jar
 ```
 
 Then open `http://localhost:8085/` in a browser. Expected page text:
 
 ```text
-Hello, World!
+Hurray, World!
 ```
 
-On EC2, use `http://<ec2-public-ip>:8085/` and open port `8085` in the security group. Optional port: `java -jar target/helloworldwithjava-1.0.0.jar 9090`.
+On EC2, use `http://<ec2-public-ip>:8085/` and open port `8085` in the security group. Optional port: `java -jar target/Hurrayworldwithjava-1.0.0.jar 9090`.
 
 Run tests only:
 
@@ -44,7 +44,7 @@ On push or pull request to `main` / `master` it will:
 ```bash
 git init
 git add .
-git commit -m "Initial Hello World Java app with GitHub Actions CI"
+git commit -m "Initial Hurray World Java app with GitHub Actions CI"
 git branch -M main
 git remote add origin https://github.com/<your-username>/<your-repo>.git
 git push -u origin main

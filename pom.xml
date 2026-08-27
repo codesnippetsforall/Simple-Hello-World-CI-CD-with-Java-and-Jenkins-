@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.example</groupId>
-    <artifactId>helloworldwithjava</artifactId>
+    <artifactId>Hurrayworldwithjava</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
-    <name>Hello World with Java</name>
-    <description>Simple Hello World Java app for GitHub CI/CD</description>
+    <name>Hurray World with Java</name>
+    <description>Simple Hurray World Java app for GitHub CI/CD</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
