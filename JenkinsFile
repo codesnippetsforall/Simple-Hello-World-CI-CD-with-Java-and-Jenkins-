@@ -1,32 +1,29 @@
 pipeline {
-    agent {
-        docker {
-            image 'maven:3.9-eclipse-temurin-21-alpine'
-            reuseNode true
-        }
-    }
+    agent none
 
     stages {
         stage('Build stage') {
+            agent {
+                docker {
+                    image 'maven:3.9-eclipse-temurin-21-alpine'
+                    reuseNode true
+                }
+            }
             steps {
-                sh '''
-                    export HOME="${WORKSPACE}"
-                    mkdir -p "${HOME}/.m2"
-                    java --version
-                    mvn -v
-                    mvn clean package -DskipTests
-                '''
+                sh 'export HOME="${WORKSPACE}" && mkdir -p "${HOME}/.m2" && mvn clean package -DskipTests'
                 stash includes: 'target/helloworldwithjava-1.0.0.jar', name: 'app-jar'
             }
         }
 
         stage('Test stage') {
+            agent {
+                docker {
+                    image 'maven:3.9-eclipse-temurin-21-alpine'
+                    reuseNode true
+                }
+            }
             steps {
-                sh '''
-                    export HOME="${WORKSPACE}"
-                    mkdir -p "${HOME}/.m2"
-                    mvn test
-                '''
+                sh 'export HOME="${WORKSPACE}" && mkdir -p "${HOME}/.m2" && mvn test'
             }
         }
 
