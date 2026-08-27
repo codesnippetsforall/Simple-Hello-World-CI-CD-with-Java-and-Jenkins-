@@ -1,6 +1,7 @@
 package com.example;
 
 import com.sun.net.httpserver.HttpServer;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
@@ -9,14 +10,19 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AppTest {
     @Test
+    @Order(2)
+    @DisplayName("greet returns Hello message for given name")
     void greetReturnsHelloWorld() {
         assertEquals("Hello, World it is full of surprises !", App.greet("World it is full of surprises "));
     }
 
     @Test
+    @Order(1)
+    @DisplayName("HTTP GET / returns Hello World body")
     void httpGetRootReturnsHelloWorld() throws Exception {
         HttpServer server = App.startServer(0);
         try {
@@ -28,6 +34,7 @@ class AppTest {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             assertEquals(200, response.statusCode());
             assertEquals("Hello, World it is full of surprises !", response.body());
+            assertTrue(response.body().startsWith("Hello,"));
         } finally {
             server.stop(0);
         }

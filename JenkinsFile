@@ -23,11 +23,12 @@ pipeline {
                 }
             }
             steps {
-                sh 'export HOME="${WORKSPACE}" && mkdir -p "${HOME}/.m2" && mvn test'
+                sh 'export HOME="${WORKSPACE}" && mkdir -p "${HOME}/.m2" && mvn test surefire-report:report'
             }
             post {
                 always {
                     junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
+                    stash name: 'test-reports', includes: 'target/surefire-reports/**,target/site/surefire-report.html', allowEmpty: true
                 }
             }
         }
@@ -51,21 +52,36 @@ pipeline {
 
     post {
         always {
-            mail(
-                to: 'dreamcoincollection@gmail.com',
-                subject: "Jenkins ${currentBuild.fullDisplayName}: ${currentBuild.currentResult}",
-                body: """Hello,
+            node {
+                script {
+                    try {
+                        unstash 'test-reports'
+                    } catch (err) {
+                        echo 'No test reports available to attach'
+                    }
+                }
+                emailext(
+                    to: 'dreamcoincollection@gmail.com',
+                    subject: "Jenkins ${currentBuild.fullDisplayName}: ${currentBuild.currentResult}",
+                    mimeType: 'text/plain',
+                    body: """Hello,
 
 Build: ${env.JOB_NAME} #${env.BUILD_NUMBER}
 Result: ${currentBuild.currentResult}
 URL: ${env.BUILD_URL}
 
-Test Result: ${env.BUILD_URL}testReport/
+Jenkins Test Result: ${env.BUILD_URL}testReport/
+
+JUnit 5 HTML report is attached (surefire-report.html).
+Surefire XML reports are also attached.
 
 Regards,
 Jenkins
-"""
-            )
+""",
+                    attachmentsPattern: 'target/site/surefire-report.html,target/surefire-reports/*.xml',
+                    attachLog: false
+                )
+            }
         }
     }
 }
