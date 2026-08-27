@@ -26,9 +26,19 @@ pipeline {
                 sh '''
                     export HOME="${WORKSPACE}"
                     mkdir -p "${HOME}/.m2" reports
-                    mvn test surefire-report:report
-                    cp -f target/site/surefire-report.html reports/surefire-report.html
-                    ls -la reports target/site target/surefire-reports
+                    mvn test
+                    mvn -q surefire-report:report-only
+                    ls -laR target/surefire-html target/site target/surefire-reports || true
+                    if [ -f target/surefire-html/surefire-report.html ]; then
+                      cp -f target/surefire-html/surefire-report.html reports/surefire-report.html
+                    elif [ -f target/site/surefire-report.html ]; then
+                      cp -f target/site/surefire-report.html reports/surefire-report.html
+                    else
+                      echo "<html><body><h1>JUnit Surefire Summary</h1><pre>" > reports/surefire-report.html
+                      cat target/surefire-reports/*.txt >> reports/surefire-report.html 2>/dev/null || true
+                      echo "</pre></body></html>" >> reports/surefire-report.html
+                    fi
+                    ls -la reports/surefire-report.html
                 '''
             }
             post {
