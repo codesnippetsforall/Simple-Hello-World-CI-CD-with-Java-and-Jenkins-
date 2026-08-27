@@ -71,6 +71,15 @@ pipeline {
             }
         }
 
+        stage ('Approval to Deploy stage') {
+            agent any
+            steps {
+                timeout(time: 1, unit: 'MINUTES') {
+                    input message: 'Approve to deploy?', ok: 'Yes, Proceed to Deploy stage !'
+                }
+            }
+        }
+
         stage('Deploy stage') {
             agent any
             options {
