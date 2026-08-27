@@ -8,7 +8,7 @@ pipeline {
 
     stages {
         stage('Build stage') {            
-
+            agent any
             steps {
                 sh '''
                     export HOME="${WORKSPACE}"
@@ -22,7 +22,7 @@ pipeline {
         }
         
         stage('Test stage') {
-            
+            agent any
             steps {
                 sh '''
                  export HOME="${WORKSPACE}"
@@ -30,6 +30,22 @@ pipeline {
                  ls -la
                  mvn test
                 '''  
+            }
+        }
+
+        stage('Deploy stage') {
+            agent any
+            steps {
+                sh '''
+                    docker stop helloworld-app || true
+                    docker rm helloworld-app || true
+                    docker run -d --name helloworld-app -p 8085:8085 \
+                    -v "$PWD/target/helloworldwithjava-1.0.0.jar:/app/app.jar" \
+                    eclipse-temurin:21-jre-alpine \
+                    java -jar /app/app.jar
+                    sleep 3
+                    curl http://localhost:8085/
+                '''
             }
         }
     }
