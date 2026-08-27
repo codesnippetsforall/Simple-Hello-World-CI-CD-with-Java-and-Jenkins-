@@ -3,6 +3,7 @@ services:
     image: docker:dind
     container_name: jenkins-docker
     privileged: true
+    restart: unless-stopped
     environment:
       - DOCKER_TLS_CERTDIR=/certs
     volumes:
@@ -16,12 +17,13 @@ services:
         aliases:
           - docker
     command: --storage-driver overlay2
+
   my-jenkins:
     image: my-jenkins
     build:
       context: .
     container_name: my-jenkins
-    restart: on-failure
+    restart: unless-stopped
     environment:
       - DOCKER_HOST=tcp://docker:2376
       - DOCKER_CERT_PATH=/certs/client
@@ -34,6 +36,8 @@ services:
       - "50000:50000"
     networks:
       - jenkins
+    depends_on:
+      - jenkins-docker
 
 networks:
   jenkins:
