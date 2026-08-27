@@ -51,7 +51,7 @@ pipeline {
 
     post {
         always {
-            emailext(
+            mail(
                 to: 'dreamcoincollection@gmail.com',
                 subject: "Jenkins ${currentBuild.fullDisplayName}: ${currentBuild.currentResult}",
                 body: """Hello,
@@ -64,8 +64,7 @@ Test Result: ${env.BUILD_URL}testReport/
 
 Regards,
 Jenkins
-""",
-                attachLog: true
+"""
             )
         }
     }
