@@ -48,4 +48,25 @@ pipeline {
             }
         }
     }
+
+    post {
+        always {
+            emailext(
+                to: 'dreamcoincollection@gmail.com',
+                subject: "Jenkins ${currentBuild.fullDisplayName}: ${currentBuild.currentResult}",
+                body: """Hello,
+
+Build: ${env.JOB_NAME} #${env.BUILD_NUMBER}
+Result: ${currentBuild.currentResult}
+URL: ${env.BUILD_URL}
+
+Test Result: ${env.BUILD_URL}testReport/
+
+Regards,
+Jenkins
+""",
+                attachLog: true
+            )
+        }
+    }
 }
