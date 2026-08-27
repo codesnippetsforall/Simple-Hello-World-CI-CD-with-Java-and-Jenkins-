@@ -2,13 +2,7 @@ pipeline {
     agent any
 
     stages {
-        stage('w/o docker') {
-            steps {
-                sh ' echo "Without Docker !" '
-            }
-        }
-        
-        stage('w/ docker') {
+        stage('Build') {
             agent {
                 docker {
                     image 'eclipse-temurin:21-jre-alpine'
@@ -16,8 +10,27 @@ pipeline {
                 }
             }
             steps {
-                sh ' echo "With Docker !" '
-                sh 'java --version'
+                sh '''
+                    ls -la
+                    java --version
+                    mvn -v
+                    mvn clean package -DskipTests                    
+                '''
+            }
+        }
+        
+        stage('Test & Deploy later') {
+            agent {
+                docker {
+                    image 'eclipse-temurin:21-jre-alpine'
+                    reuseNode true
+                }
+            }
+            
+            steps {
+                sh '''
+                 echo "Test & Deploy later !" 
+                '''  
             }
         }
     }
