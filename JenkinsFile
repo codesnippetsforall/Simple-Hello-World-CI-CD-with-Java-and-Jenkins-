@@ -29,14 +29,12 @@ pipeline {
                     mvn test
                     mvn -q surefire-report:report-only
 
-                    # Email-friendly report (no external images/css)
                     {
                       echo '<html><body style="font-family:Arial,sans-serif">'
                       echo '<h2>JUnit 5 Surefire Summary</h2>'
                       echo '<pre style="background:#f6f8fa;padding:12px;border-radius:6px">'
                       cat target/surefire-reports/*.txt 2>/dev/null || echo "No txt summary found"
                       echo '</pre>'
-                      echo '<p>Open the full styled report from the Jenkins artifact link in this email.</p>'
                       echo '</body></html>'
                     } > reports/email-report.html
 
@@ -46,6 +44,14 @@ pipeline {
             post {
                 always {
                     junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
+                    publishHTML(target: [
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'target/surefire-html',
+                        reportFiles: 'surefire-report.html',
+                        reportName: 'Surefire HTML Report'
+                    ])
                     archiveArtifacts artifacts: 'reports/email-report.html,target/surefire-html/**,target/surefire-reports/*.xml', allowEmptyArchive: true
                     stash name: 'test-reports', includes: 'reports/email-report.html', allowEmpty: true
                 }
@@ -71,9 +77,39 @@ pipeline {
 
     post {
         always {
-            echo 'Publishing HTML report...'
-            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'reports', reportFiles: 'surefire-report.html', reportName: 'Surefire HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+            node('built-in') {
+                script {
+                    def reportHtml = '<p>No test summary found.</p>'
+                    try {
+                        unstash 'test-reports'
+                        if (fileExists('reports/email-report.html')) {
+                            reportHtml = readFile('reports/email-report.html')
+                        }
+                    } catch (err) {
+                        echo "No test reports available: ${err}"
+                    }
+
+                    mail(
+                        to: 'dreamcoincollection@gmail.com',
+                        subject: "Jenkins ${currentBuild.fullDisplayName}: ${currentBuild.currentResult}",
+                        mimeType: 'text/html',
+                        body: """
+<html>
+<body style="font-family:Arial,sans-serif">
+<p>Hello,</p>
+<p><b>Build:</b> ${env.JOB_NAME} #${env.BUILD_NUMBER}<br/>
+<b>Result:</b> ${currentBuild.currentResult}<br/>
+<a href="${env.BUILD_URL}">Build URL</a> |
+<a href="${env.BUILD_URL}testReport/">Jenkins Test Result</a> |
+<a href="${env.BUILD_URL}Surefire_20HTML_20Report/">Surefire HTML Report</a></p>
+<hr/>
+${reportHtml}
+</body>
+</html>
+"""
+                    )
+                }
+            }
         }
-            
     }
 }
