@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class AppTest {
     @Test
     void greetReturnsHelloWorld() {
-        assertEquals("Hello, World!", App.greet("World"));
+        assertEquals("Hello, World it is full of surprises !", App.greet("World it is full of surprises "));
     }
 
     @Test
@@ -27,7 +27,7 @@ class AppTest {
                     .build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             assertEquals(200, response.statusCode());
-            assertEquals("Hello, World!", response.body());
+            assertEquals("Hello, World it is full of surprises !", response.body());
         } finally {
             server.stop(0);
         }

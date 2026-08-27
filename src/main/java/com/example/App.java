@@ -21,7 +21,7 @@ public class App {
                 exchange.sendResponseHeaders(405, -1);
                 return;
             }
-            byte[] body = greet("World it is full of surprises !").getBytes(StandardCharsets.UTF_8);
+            byte[] body = greet("World it is full of surprises ").getBytes(StandardCharsets.UTF_8);
             exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=utf-8");
             exchange.sendResponseHeaders(200, body.length);
             try (OutputStream os = exchange.getResponseBody()) {
