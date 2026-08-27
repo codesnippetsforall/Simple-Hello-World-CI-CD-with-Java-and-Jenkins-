@@ -1,24 +1,37 @@
 pipeline {
     agent none
 
+    environment {
+        MAVEN_IMAGE       = 'maven:3.9-eclipse-temurin-21-alpine'
+        RUNTIME_IMAGE     = 'eclipse-temurin:21-jre-alpine'
+        APP_NAME          = 'Hurrayworld-app'
+        APP_JAR           = 'Hurrayworldwithjava-1.0.0.jar'
+        APP_PORT          = '8085'
+        DOCKER_HOST_ALIAS = 'docker'
+        STASH_APP_JAR     = 'app-jar'
+        STASH_TEST_REPORTS = 'test-reports'
+        EMAIL_TO          = 'dreamcoincollection@gmail.com'
+        REPORT_NAME       = 'Surefire HTML Report'
+    }
+
     stages {
         stage('Build stage') {
             agent {
                 docker {
-                    image 'maven:3.9-eclipse-temurin-21-alpine'
+                    image "${MAVEN_IMAGE}"
                     reuseNode true
                 }
             }
             steps {
                 sh 'export HOME="${WORKSPACE}" && mkdir -p "${HOME}/.m2" && mvn clean package -DskipTests'
-                stash includes: 'target/Hurrayworldwithjava-1.0.0.jar', name: 'app-jar'
+                stash includes: "target/${APP_JAR}", name: "${STASH_APP_JAR}"
             }
         }
 
         stage('Test stage') {
             agent {
                 docker {
-                    image 'maven:3.9-eclipse-temurin-21-alpine'
+                    image "${MAVEN_IMAGE}"
                     reuseNode true
                 }
             }
@@ -50,10 +63,10 @@ pipeline {
                         keepAll: true,
                         reportDir: 'target/surefire-html',
                         reportFiles: 'surefire-report.html',
-                        reportName: 'Surefire HTML Report'
+                        reportName: "${REPORT_NAME}"
                     ])
                     archiveArtifacts artifacts: 'reports/email-report.html,target/surefire-html/**,target/surefire-reports/*.xml', allowEmptyArchive: true
-                    stash name: 'test-reports', includes: 'reports/email-report.html', allowEmpty: true
+                    stash name: "${STASH_TEST_REPORTS}", includes: 'reports/email-report.html', allowEmpty: true
                 }
             }
         }
@@ -64,18 +77,20 @@ pipeline {
                 skipDefaultCheckout(true)
             }
             steps {
-                unstash 'app-jar'
+                unstash "${STASH_APP_JAR}"
                 sh '''
-                    echo "Releasing port 8085 if already in use..."
-                    ids=$(docker ps -aq --filter publish=8085)
+                    echo "Releasing port ${APP_PORT} if already in use..."
+                    ids=$(docker ps -aq --filter publish=${APP_PORT})
                     if [ -n "$ids" ]; then
                       docker rm -f $ids
                     fi
-                    docker rm -f Hurrayworld-app helloworld-app 2>/dev/null || true
-                    docker run -d --name Hurrayworld-app -p 8085:8085 -v "${WORKSPACE}/target/Hurrayworldwithjava-1.0.0.jar:/app/app.jar" eclipse-temurin:21-jre-alpine java -jar /app/app.jar
+                    docker rm -f "${APP_NAME}" helloworld-app 2>/dev/null || true
+                    docker run -d --name "${APP_NAME}" -p ${APP_PORT}:${APP_PORT} \
+                      -v "${WORKSPACE}/target/${APP_JAR}:/app/app.jar" \
+                      ${RUNTIME_IMAGE} java -jar /app/app.jar
                     sleep 5
-                    docker logs Hurrayworld-app
-                    curl -f --max-time 10 http://docker:8085/
+                    docker logs "${APP_NAME}"
+                    curl -f --max-time 10 "http://${DOCKER_HOST_ALIAS}:${APP_PORT}/"
                 '''
             }
         }
@@ -87,7 +102,7 @@ pipeline {
                 script {
                     def reportHtml = '<p>No test summary found.</p>'
                     try {
-                        unstash 'test-reports'
+                        unstash env.STASH_TEST_REPORTS
                         if (fileExists('reports/email-report.html')) {
                             reportHtml = readFile('reports/email-report.html')
                         }
@@ -96,7 +111,7 @@ pipeline {
                     }
 
                     mail(
-                        to: 'dreamcoincollection@gmail.com',
+                        to: env.EMAIL_TO,
                         subject: "Jenkins ${currentBuild.fullDisplayName}: ${currentBuild.currentResult}",
                         mimeType: 'text/html',
                         body: """
