@@ -23,12 +23,19 @@ pipeline {
                 }
             }
             steps {
-                sh 'export HOME="${WORKSPACE}" && mkdir -p "${HOME}/.m2" && mvn test surefire-report:report'
+                sh '''
+                    export HOME="${WORKSPACE}"
+                    mkdir -p "${HOME}/.m2" reports
+                    mvn test surefire-report:report
+                    cp -f target/site/surefire-report.html reports/surefire-report.html
+                    ls -la reports target/site target/surefire-reports
+                '''
             }
             post {
                 always {
                     junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
-                    stash name: 'test-reports', includes: 'target/surefire-reports/**,target/site/surefire-report.html', allowEmpty: true
+                    archiveArtifacts artifacts: 'reports/surefire-report.html,target/surefire-reports/*.xml', allowEmptyArchive: true
+                    stash name: 'test-reports', includes: 'reports/surefire-report.html,target/surefire-reports/*.xml', allowEmpty: true
                 }
             }
         }
@@ -55,15 +62,17 @@ pipeline {
             node('built-in') {
                 script {
                     def reportHtml = '<p>No Surefire HTML report found.</p>'
+                    def reportLink = "${env.BUILD_URL}artifact/reports/surefire-report.html"
                     try {
                         unstash 'test-reports'
-                        if (fileExists('target/site/surefire-report.html')) {
-                            reportHtml = readFile('target/site/surefire-report.html')
+                        if (fileExists('reports/surefire-report.html')) {
+                            reportHtml = readFile('reports/surefire-report.html')
                         }
                     } catch (err) {
-                        echo 'No test reports available to include in email'
+                        echo "No test reports available: ${err}"
                     }
 
+                    // mail step cannot attach files; report is inlined + download link
                     mail(
                         to: 'dreamcoincollection@gmail.com',
                         subject: "Jenkins ${currentBuild.fullDisplayName}: ${currentBuild.currentResult}",
@@ -75,7 +84,8 @@ pipeline {
 <p><b>Build:</b> ${env.JOB_NAME} #${env.BUILD_NUMBER}<br/>
 <b>Result:</b> ${currentBuild.currentResult}<br/>
 <a href="${env.BUILD_URL}">Build URL</a> |
-<a href="${env.BUILD_URL}testReport/">Jenkins Test Result</a></p>
+<a href="${env.BUILD_URL}testReport/">Jenkins Test Result</a> |
+<a href="${reportLink}">Download Surefire HTML Report</a></p>
 <hr/>
 <h3>JUnit 5 Surefire Report</h3>
 ${reportHtml}
