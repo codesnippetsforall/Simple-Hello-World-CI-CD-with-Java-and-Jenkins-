@@ -1,14 +1,14 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'maven:3.9-eclipse-temurin-21-alpine'
+            reuseNode true
+        }
+    }
 
     stages {
-        stage('Build') {
-            agent {
-                docker {
-                    image 'maven:3.9-eclipse-temurin-21-alpine'
-                    reuseNode true
-                }
-            }
+        stage('Build stage') {            
+
             steps {
                 sh '''
                     export HOME="${WORKSPACE}"
@@ -16,22 +16,19 @@ pipeline {
                     ls -la
                     java --version
                     mvn -v
-                    mvn clean
+                    mvn clean package -DskipTests
                 '''
             }
         }
         
-        stage('Test & Deploy later') {
-            agent {
-                docker {
-                    image 'eclipse-temurin:21-jre-alpine'
-                    reuseNode true
-                }
-            }
+        stage('Test stage') {
             
             steps {
                 sh '''
-                 echo "Test & Deploy later !" 
+                 export HOME="${WORKSPACE}"
+                 mkdir -p "${HOME}/.m2"
+                 ls -la
+                 mvn test
                 '''  
             }
         }
