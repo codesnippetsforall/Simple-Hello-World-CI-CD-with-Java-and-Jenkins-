@@ -11,6 +11,7 @@ pipeline {
         STASH_APP_JAR     = 'app-jar'
         STASH_TEST_REPORTS = 'test-reports'
         EMAIL_TO          = credentials('REPORT_TO_ADDRESS_EMAIL_ID')
+        NVD_API_KEY       = credentials('NVD_API_KEY')
         REPORT_NAME       = 'Surefire HTML Report'
     }
 
@@ -25,6 +26,22 @@ pipeline {
             steps {
                 sh 'export HOME="${WORKSPACE}" && mkdir -p "${HOME}/.m2" && mvn clean package -DskipTests'
                 stash includes: "target/${APP_JAR}", name: "${STASH_APP_JAR}"
+            }
+        }
+
+        stage('Dependency Scan') {
+            agent {
+                docker {
+                    image "${MAVEN_IMAGE}"
+                    reuseNode true
+                }
+            }
+            steps {
+                sh '''
+                    export HOME="${WORKSPACE}"
+                    mkdir -p "${HOME}/.m2"
+                    mvn -B dependency-check:check
+                '''
             }
         }
 
@@ -100,6 +117,7 @@ pipeline {
                     sleep 5
                     docker logs "${APP_NAME}"
                     curl -f --max-time 10 "http://${DOCKER_HOST_ALIAS}:${APP_PORT}/"
+                    curl -f --max-time 10 "http://${DOCKER_HOST_ALIAS}:${APP_PORT}/api/health"
                 '''
             }
         }

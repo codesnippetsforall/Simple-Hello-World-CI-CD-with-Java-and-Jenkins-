@@ -59,6 +59,15 @@
                     </archive>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>13.0.0</version>
+                <configuration>
+                    <failBuildOnCVSS>7</failBuildOnCVSS>
+                    <nvdApiKey>${env.NVD_API_KEY}</nvdApiKey>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>
