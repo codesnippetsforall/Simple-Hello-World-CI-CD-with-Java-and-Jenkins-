@@ -12,4 +12,3 @@ target/
 .DS_Store
 Thumbs.db
 ec2-instance-for-playground.txt
-.github/workflows/ci.yml
