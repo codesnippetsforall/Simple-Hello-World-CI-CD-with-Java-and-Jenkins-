@@ -2,7 +2,9 @@
 
 Simple **Java 21** Maven HTTP app with **REST API** endpoints, a **Jenkins Pipeline** (build, OWASP dependency scan, test, manual approval, deploy), Surefire reports, and email notifications.
 
-Repo example: [Simple-Hello-World-CI-CD-with-Java-and-Jenkins-](https://github.com/codesnippetsforall/Simple-Hello-World-CI-CD-with-Java-and-Jenkins-)
+Repo: [Simple-Hello-World-CI-CD-with-Java-and-Jenkins-](https://github.com/codesnippetsforall/Simple-Hello-World-CI-CD-with-Java-and-Jenkins-)
+
+**CI/CD in this repo:** **Jenkins only** — pipeline is defined in `JenkinsFile`. There is **no** `.github/workflows/` (no GitHub Actions YAML). GitHub is used as the **source repository** and **webhook trigger** for Jenkins on push to `main`.
 
 ## What the app does
 
@@ -33,7 +35,7 @@ curl http://localhost:8085/api/greet?name=Java
 | `src/main/java/com/example/App.java` | HTTP server, REST API, `greet()` |
 | `src/test/java/com/example/AppTest.java` | JUnit 5 tests (`@Order`) for `/`, `/api/health`, `/api/greet` |
 | `pom.xml` | Maven, Java 21, Surefire, **OWASP Dependency-Check** |
-| `JenkinsFile` | Jenkins Declarative Pipeline |
+| `JenkinsFile` | Jenkins Declarative Pipeline (sole CI/CD config) |
 | `Dockerfile` | Custom Jenkins image (Docker CLI) |
 | `docker-compose.yml` | Jenkins + Docker-in-Docker (DinD) |
 
@@ -467,6 +469,8 @@ The Deploy stage already removes any container publishing **8085** before starti
 | `my-jenkins` (local build) | Jenkins controller |
 
 ## Push to GitHub
+
+GitHub stores the code; **Jenkins** (not GitHub Actions) runs the pipeline when you push.
 
 ```bash
 git add .
