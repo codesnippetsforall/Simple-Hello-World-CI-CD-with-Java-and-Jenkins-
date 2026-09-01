@@ -6,7 +6,7 @@ Repo: [Simple-Hello-World-CI-CD-with-Java-and-Jenkins-](https://github.com/codes
 
 **CI/CD in this repo:** **Jenkins only** — pipeline is defined in `JenkinsFile`. There is **no** `.github/workflows/` (no GitHub Actions YAML). GitHub is used as the **source repository** and **webhook trigger** for Jenkins on push to `main`.
 
-## What the app does
+## What the app does 
 
 - Runs an embedded HTTP server on port **8085** (plain Java `HttpServer`, no Spring)
 - Serves a browser-friendly greeting and JSON **REST API** endpoints
