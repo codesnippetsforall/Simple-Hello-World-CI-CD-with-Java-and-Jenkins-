@@ -97,30 +97,8 @@ pipeline {
             }
         }
 
-        stage('Deploy stage') {
-            agent any
-            options {
-                skipDefaultCheckout(true)
-            }
-            steps {
-                unstash "${STASH_APP_JAR}"
-                sh '''
-                    echo "Releasing port ${APP_PORT} if already in use..."
-                    ids=$(docker ps -aq --filter publish=${APP_PORT})
-                    if [ -n "$ids" ]; then
-                      docker rm -f $ids
-                    fi
-                    docker rm -f "${APP_NAME}" helloworld-app 2>/dev/null || true
-                    docker run -d --name "${APP_NAME}" -p ${APP_PORT}:${APP_PORT} \
-                      -v "${WORKSPACE}/target/${APP_JAR}:/app/app.jar" \
-                      ${RUNTIME_IMAGE} java -jar /app/app.jar
-                    sleep 5
-                    docker logs "${APP_NAME}"
-                    curl -f --max-time 10 "http://${DOCKER_HOST_ALIAS}:${APP_PORT}/"
-                    curl -f --max-time 10 "http://${DOCKER_HOST_ALIAS}:${APP_PORT}/api/health"
-                '''
-            }
-        }
+      /* Deployment Stage Starts */
+     /* Deployment Stage Ends */
     }
 
     post {
