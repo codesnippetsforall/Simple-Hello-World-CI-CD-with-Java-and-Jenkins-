@@ -12,7 +12,7 @@ Repo: [Simple-Hello-World-CI-CD-with-Java-and-Jenkins-](https://github.com/codes
 - Serves a browser-friendly greeting and JSON **REST API** endpoints
 - Built as an executable JAR: `target/Hurrayworldwithjava-1.0.0.jar`
 
-### REST API endpoints
+### REST API endpoints  
 
 | Method | URL | Response |
 |---|---|---|
